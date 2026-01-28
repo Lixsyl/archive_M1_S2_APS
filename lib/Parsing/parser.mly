@@ -17,6 +17,12 @@ open Ast
 %token LBRA RBRA
 %token ECHO
 
+%token <int> INT
+%token <bool> BOOL
+%token PV DP VIR STAR ARR 
+%token CONST FUN REC IF AND OR 
+
+// QUESTION
 %type <Ast.expr> expr
 %type <Ast.expr list> exprs
 %type <Ast.cmd list> cmds
@@ -25,11 +31,38 @@ open Ast
 %start prog
 
 %%
-prog: LBRA cmds RBRA    { $2 }
+prog: LBRA cmds RBRA    { $2 } // QUESTION
 ;
 
 cmds:
   stat                  { [ASTStat $1] }
+| def PV cmds           { ASTDef ($1, $3)}
+;
+
+def:
+  CONST IDENT type1 expr                { ASTConst($2, $3, $4) }
+| FUN IDENT type1 LBRA args RBRA expr   { ASTFun($2, $3, $5, $7) }
+| FUN REC IDENT type1 LBRA args RBRA expr   { ASTFun($3, $4, $6, $8) }
+;
+
+type1:
+  INT               { ASTInt($1) }
+| BOOL              { ASTBool($1) }
+| types ARR type1   { ASTTypeT($1, $3) }
+;
+
+types : // QUESTION
+  type1         { [$1] } 
+| type1 STAR types   { $1::$2 }
+;
+
+arg:
+  IDENT DP type1  { ASTArg($1, $3) }
+;
+
+args : // QUESTION
+  arg         { [$1] } 
+| arg VIR args   { $1::$2 }
 ;
 
 stat:
@@ -46,7 +79,7 @@ expr:
 | LPAR expr exprs RPAR  { ASTApp($2, $3) }
 ;
 
-exprs :
+exprs : // QUESTION
   expr       { [$1] }
 | expr exprs { $1::$2 }
 ;
