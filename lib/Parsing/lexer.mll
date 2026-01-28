@@ -17,7 +17,10 @@ rule token = parse
   | ']'              { RBRA }
   | '('              { LPAR }
   | ')'              { RPAR }
-  | "ECHO"           { ECHO }    
+  | "ECHO"           { ECHO }
+  | "if"             { IF   }
+  | "and"            { AND  }
+  | "or"             { OR   }
   | ['0'-'9']+('.'['0'-'9'])? as lxm { NUM(int_of_string lxm) }
   | ['a'-'z']['a'-'z''A'-'Z''0'-'9']* as lxm { IDENT(lxm) }
   | eof              { raise Eof }
