@@ -23,15 +23,21 @@ open Ast
 %token CONST FUN REC IF AND OR 
 
 // QUESTION
+%type <Ast.type1> type1
+%type <Ast.types> types
+%type <Ast.arg> arg
+%type <Ast.args> args
 %type <Ast.expr> expr
-%type <Ast.expr list> exprs
-%type <Ast.cmd list> cmds
-%type <Ast.cmd list> prog
+%type <Ast.exprs> exprs
+%type <Ast.stat> stat
+%type <Ast.def> def
+%type <Ast.cmds> cmds
+%type <Ast.cmds list> prog
 
 %start prog
 
 %%
-prog: LBRA cmds RBRA    { $2 } // QUESTION
+prog: LBRA cmds RBRA    { [$2] } // QUESTION
 ;
 
 cmds:
@@ -53,7 +59,7 @@ type1:
 
 types : // QUESTION
   type1         { [$1] } 
-| type1 STAR types   { $1::$2 }
+| type1 STAR types   { $1::$3 }
 ;
 
 arg:
@@ -62,7 +68,7 @@ arg:
 
 args : // QUESTION
   arg         { [$1] } 
-| arg VIR args   { $1::$2 }
+| arg VIR args   { $1::$3 }
 ;
 
 stat:

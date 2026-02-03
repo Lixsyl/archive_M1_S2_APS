@@ -8,39 +8,20 @@
 (* ==  Arbre de syntaxe abstraite                                          == *)
 (* ========================================================================== *)
 
-(*PROG
-type prog = 
-    ASTCmdsL of cmds list
-*)
-
-(*CMDS*)
-type cmds =
-    ASTStat of stat
-  | ASTDef of def * cmds
-
-(*DEF*)
-type def =
-    ASTConst of string * type1 * expr
-  | ASTFun of string * type1 * args * expr
-  | ASTFunRec of string * type1 * args * expr
-  
 (*TYPE*)
+
 type type1 = 
     ASTInt of int
   | ASTBool of bool
   | ASTTypeT of types * type1
 
-type types = type1 list
+and types = type1 list
 
 (*ARG*)
 type arg =
     ASTArg of string * type1
 
 type args = arg list
-
-(*STAT*)
-type stat =
-    ASTEcho of expr
 
 (*EXPR*)
 type expr =
@@ -52,5 +33,27 @@ type expr =
   | ASTAno of args * expr
   | ASTApp of expr * exprs
 
-type exprs = expr list
+and exprs = expr list
 
+(*STAT*)
+type stat =
+    ASTEcho of expr
+
+(*DEF*)
+type def =
+    ASTConst of string * type1 * expr
+  | ASTFun of string * type1 * args * expr
+  | ASTFunRec of string * type1 * args * expr
+
+(*CMDS*)
+type cmds =
+    ASTStat of stat
+  | ASTDef of def * cmds
+
+(*
+and cmdsl = cmds list *)
+
+(*PROG
+type prog = 
+    ASTCmdsL of cmds list
+*)
