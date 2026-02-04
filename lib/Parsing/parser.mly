@@ -78,7 +78,7 @@ expr:
 | LPAR IF expr expr expr RPAR  { ASTIf($3, $4, $5) }
 | LPAR AND expr expr RPAR      { ASTAnd($3, $4) }
 | LPAR OR expr expr RPAR       { ASTOr($3, $4) }
-| LBRA args RBRA expr   { ASTAno($2, $4) }
+| LBRA args RBRA expr   { ASTAbs($2, $4) }
 | LPAR expr exprs RPAR  { ASTApp($2, $3) }
 ;
 
