@@ -1,9 +1,9 @@
 
 main :- read(user_input, X), type_check(X).
 
-type_check(prog(P)) :- type_prog(prog(P)), write("OK\n").
+/*type_check(prog(P)) :- type_prog(prog(P)), write("OK\n").*/
 type_check(_) :- write("KO\n").
-
+/*
 contexte_initial([_
     (true, bool),
     (false, bool),
@@ -27,3 +27,4 @@ type_cmd(G,stat(S),void) :- type_stat(G,S,void).
 type_cmd(G,stat(S),void) :- type_stat(G,S,void).
 type_stat(G,echo(E),void) :- type_expr(G,E,int).
 
+*/

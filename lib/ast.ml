@@ -9,19 +9,14 @@
 (* ========================================================================== *)
 
 (*TYPE*)
-
 type type1 = 
-    ASTInt of int
-  | ASTBool of bool
-  | ASTTypeT of types * type1
-
-and types = type1 list
+    ASTInt
+  | ASTBool
+  | ASTTypeT of type1 list * type1
 
 (*ARG*)
 type arg =
     ASTArg of string * type1
-
-type args = arg list
 
 (*EXPR*)
 type expr =
@@ -30,10 +25,8 @@ type expr =
   | ASTIf of expr * expr * expr
   | ASTAnd of expr * expr
   | ASTOr of expr * expr
-  | ASTAno of args * expr
-  | ASTApp of expr * exprs
-
-and exprs = expr list
+  | ASTAno of arg list * expr
+  | ASTApp of expr * expr list
 
 (*STAT*)
 type stat =
@@ -42,13 +35,13 @@ type stat =
 (*DEF*)
 type def =
     ASTConst of string * type1 * expr
-  | ASTFun of string * type1 * args * expr
-  | ASTFunRec of string * type1 * args * expr
+  | ASTFun of string * type1 * arg list * expr
+  | ASTFunRec of string * type1 * arg list * expr
 
 (*CMDS*)
-type cmds =
+type cmd =
     ASTStat of stat
-  | ASTDef of def * cmds
+  | ASTDef of def * cmd
 
 (*
 and cmdsl = cmds list *)

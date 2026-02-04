@@ -17,34 +17,31 @@ open Ast
 %token LBRA RBRA
 %token ECHO
 
-%token <int> INT
-%token <bool> BOOL
+%token INT BOOL
 %token PV DP VIR STAR ARR 
 %token CONST FUN REC IF AND OR 
 
-// QUESTION
 %type <Ast.type1> type1
-%type <Ast.types> types
+%type <Ast.type1 list> types
 %type <Ast.arg> arg
-%type <Ast.args> args
+%type <Ast.arg list> args
 %type <Ast.expr> expr
-%type <Ast.exprs> exprs
+%type <Ast.expr list> exprs
 %type <Ast.stat> stat
 %type <Ast.def> def
-%type <Ast.cmds> cmds
-%type <Ast.cmds list> prog
+%type <Ast.cmd> cmds
+%type <Ast.cmd list> prog
 
 %start prog
 
 %%
-prog: LBRA cmds RBRA    { [$2] } // QUESTION
+prog: LBRA cmds RBRA    { [$2] } 
 ;
 
 cmds:
-  stat                  { [ASTStat $1] }
+  stat                  { ASTStat ($1) }
 | def PV cmds           { ASTDef ($1, $3)}
 ;
-
 def:
   CONST IDENT type1 expr                { ASTConst($2, $3, $4) }
 | FUN IDENT type1 LBRA args RBRA expr   { ASTFun($2, $3, $5, $7) }
@@ -52,22 +49,22 @@ def:
 ;
 
 type1:
-  INT               { ASTInt($1) }
-| BOOL              { ASTBool($1) }
-| types ARR type1   { ASTTypeT($1, $3) }
+  INT               { ASTInt }
+| BOOL              { ASTBool }
+| LPAR types ARR type1 RPAR     { ASTTypeT($2, $4) }
 ;
 
-types : // QUESTION
-  type1         { [$1] } 
-| type1 STAR types   { $1::$3 }
+types:
+    type1              { [$1] }
+  | type1 STAR types   { $1::$3 }
 ;
 
 arg:
   IDENT DP type1  { ASTArg($1, $3) }
 ;
 
-args : // QUESTION
-  arg         { [$1] } 
+args :
+  arg            { [$1] } 
 | arg VIR args   { $1::$3 }
 ;
 
@@ -85,7 +82,7 @@ expr:
 | LPAR expr exprs RPAR  { ASTApp($2, $3) }
 ;
 
-exprs : // QUESTION
+exprs :
   expr       { [$1] }
 | expr exprs { $1::$2 }
 ;
