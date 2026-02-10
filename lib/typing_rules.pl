@@ -18,7 +18,7 @@ contexte_initial([
 arrow(_,_).
 
 /* Programmes */
-type_prog(prog(CS),void) :- 
+type_prog(prog(CS)) :- 
     contexte_initial(G),
     type_cmd(G,CS,void).
 
@@ -32,14 +32,16 @@ type_cmd(G,stat(S),void) :- type_stat(G,S,void).
 type_def(G,const(X,T,E),G2) :- 
     type_expr(G,E,T),
     append(G,[(X,T)],G2).
-/* FUN a faire */ 
-types()
 type_def(G,fun(X,T,L,E),G3) :- 
     append(G,L,G2),
     type_expr(G2,E,T),
-    append(G,[(X,arrow(types(L),T))], G3).
-
-/* FUN REC */
+    list_types(L,LT),
+    append(G,[(X,arrow(LT,T))], G3).
+type_def(G,funrec(X,T,L,E),G2) :- 
+    list_types(L,LT),
+    append(G,[(X,arrow(LT,T))], G2),
+    append(G2,L,G3),
+    type_expr(G3,E,T).
 
 /* Intruction */
 type_stat(G,echo(E),void) :- type_expr(G,E,int).
@@ -57,6 +59,20 @@ type_expr(G,and(E1,E2),bool) :-
 type_expr(G,or(E1,E2),bool) :- 
     type_expr(G,E1,bool),
     type_expr(G,E2,bool).
+type_expr(G,(E,LE),T) :- 
+    type_expr(G,E,TE),
+    arrow(LT,T) = TE,
+    types_expr_list(G,LE,LT).
+type_expr(G,(L,E),arrow(LT,T)) :- 
+    append(G,L,G2),
+    type_expr(G2,E,T),
+    list_types(L,LT).
 
-/* APP */
-/* ABS */
+/* AUX list_types */
+list_types([],[]).
+list_types([(_,X)|T],[X|XS]) :- list_types(T,XS).
+/* AUX types_expr_list */
+types_expr_list(_,[],[]).
+types_expr_list(G, [E|LE], [T|LT]) :-
+    type_expr(G, E, T),
+    type_expr_list(G, LE, LT).
