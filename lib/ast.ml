@@ -25,8 +25,8 @@ type expr =
   | ASTIf of expr * expr * expr
   | ASTAnd of expr * expr
   | ASTOr of expr * expr
-  | ASTAbs of arg list * expr
   | ASTApp of expr * expr list
+  | ASTAbs of arg list * expr
 
 (*STAT*)
 type stat =

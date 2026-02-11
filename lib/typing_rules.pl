@@ -23,7 +23,7 @@ type_prog(prog(CS)) :-
     type_cmd(G,CS,void).
 
 /* Suite de commandes */
-type_cmd(G,cmd(def(D),CS),void) :- 
+type_cmd(G,def(D,CS),void) :- 
     type_def(G,D,G2),
     type_cmd(G2,CS,void). 
 type_cmd(G,stat(S),void) :- type_stat(G,S,void).
@@ -59,11 +59,11 @@ type_expr(G,and(E1,E2),bool) :-
 type_expr(G,or(E1,E2),bool) :- 
     type_expr(G,E1,bool),
     type_expr(G,E2,bool).
-type_expr(G,(E,LE),T) :- 
+type_expr(G,app(E,LE),T) :- 
     type_expr(G,E,TE),
     arrow(LT,T) = TE,
     types_expr_list(G,LE,LT).
-type_expr(G,(L,E),arrow(LT,T)) :- 
+type_expr(G,abs(L,E),arrow(LT,T)) :- 
     append(G,L,G2),
     type_expr(G2,E,T),
     list_types(L,LT).
@@ -75,4 +75,4 @@ list_types([(_,X)|T],[X|XS]) :- list_types(T,XS).
 types_expr_list(_,[],[]).
 types_expr_list(G, [E|LE], [T|LT]) :-
     type_expr(G, E, T),
-    type_expr_list(G, LE, LT).
+    types_expr_list(G, LE, LT).
