@@ -42,11 +42,3 @@ type def =
 type cmd =
     ASTStat of stat
   | ASTDef of def * cmd
-
-(*
-and cmdsl = cmds list *)
-
-(*PROG
-type prog = 
-    ASTCmdsL of cmds list
-*)
