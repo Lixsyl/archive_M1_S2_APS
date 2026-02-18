@@ -1,5 +1,6 @@
 open Aps_syntax.Manip_sys
 open Aps_syntax.PrologTerm
+open Aps_syntax.Interpreter
 
 let l_test_0 = [(testfile_name 0 0, "OK"); 
                 (testfile_name 0 1, "KO"); 
@@ -23,7 +24,8 @@ List.fold_right
       pp_prog Format.str_formatter p;
       let s = Format.flush_str_formatter () in
       match cmd_typ  s with
-      | Ok(s,_) -> Format.printf "%s |\t Résultat du typeur : %s\t Résultat attendu : %s\n" fname s expected
+      | Ok(s,_) ->  (Format.printf "%s |\t Résultat du typeur : %s\t Résultat attendu : %s\n" fname s expected); 
+                    if s = "OK" then let p = get_prog fname in Format.printf "%s |\t Résultat : %s\n" fname (print_flux (i_prog p)) ;
       | Error (`Msg m) -> print_endline m
 
 ) l_test ()
@@ -33,5 +35,5 @@ let _ =
   Format.printf "- Test de PrologTerm\n";
   test_prologTerm (fst (List.split l_test_0 ));
   print_endline "- Test du typeur\n";
-  test_typeur l_test_0
+  test_typeur l_test_0;
 
