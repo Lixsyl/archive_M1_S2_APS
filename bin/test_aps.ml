@@ -6,7 +6,9 @@ let l_test_0 = [(testfile_name 0 0, "OK");
                 (testfile_name 0 1, "KO"); 
                 (testfile_name 0 2, "KO");
                 (testfile_name 0 3, "KO");
-                (testfile_name 0 4, "OK")]
+                (testfile_name 0 4, "OK");
+                (testfile_name 0 5, "OK");
+                (testfile_name 0 6, "OK")]
 
 
 let test_prologTerm (l_test : string list) =
@@ -23,7 +25,7 @@ List.fold_right
   let p = get_prog fname  in
       pp_prog Format.str_formatter p;
       let s = Format.flush_str_formatter () in
-      match cmd_typ  s with
+      match cmd_typ s with
       | Ok(s,_) ->  (Format.printf "%s |\t Résultat du typeur : %s\t Résultat attendu : %s\n" fname s expected); 
                     if s = "OK" then let p = get_prog fname in Format.printf "%s |\t Résultat : %s\n" fname (print_flux (i_prog p)) ;
       | Error (`Msg m) -> print_endline m

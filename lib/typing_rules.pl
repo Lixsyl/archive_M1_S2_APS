@@ -50,7 +50,7 @@ type_stat(G,echo(E),void) :- type_expr(G,E,int).
 type_expr(_,num(_),int).
 type_expr(G,ident(X),T) :- member((X,T),G).
 type_expr(G,if(E1,E2,E3),T) :- 
-    member((E1,bool),G),
+    type_expr(G,E1,bool),
     type_expr(G,E2,T),
     type_expr(G,E3,T).
 type_expr(G,and(E1,E2),bool) :- 
