@@ -31,14 +31,26 @@ type expr =
 (*STAT*)
 type stat =
     ASTEcho of expr
+  | ASTSet of string * expr
+  | ASTIf2 of expr * block * block
+  | ASTWhile of expr * block
+  | ASTCall of string * expr list
 
 (*DEF*)
-type def =
+and def =
     ASTConst of string * type1 * expr
   | ASTFun of string * type1 * arg list * expr
   | ASTFunRec of string * type1 * arg list * expr
+  | ASTVar of string * type1
+  | ASTProc of string * arg list * block
+  | ASTProcRec of string * arg list * block
 
 (*CMDS*)
-type cmd =
+and cmd =
     ASTStat of stat
   | ASTDef of def * cmd
+  | ASTStats of stat * cmd
+
+(*BLOCK*)
+and block = 
+    ASTCmds of cmd

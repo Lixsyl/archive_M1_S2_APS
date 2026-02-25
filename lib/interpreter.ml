@@ -12,9 +12,12 @@ let rec print_flux f =
 (*VALUE*)
 type value = 
     InZ of int
-(*  | InB of bool*)
   | InF of expr * string list * env
   | InFR of expr * string * string list * env
+  | InA of string
+  | InP of cmd * string list * env
+  | InPR of cmd * string * string list * env
+
 (*ENV*)
 and env = (string * value) list
 
@@ -33,6 +36,9 @@ let rec env_updates keys values env =
     | ([], []) -> env
     | (k::ks, v::vs) -> env_updates ks vs (env_update k v env)
     | _ -> failwith "Error : env_updates" 
+
+(*MEMOIRE : unchecked InA -> InZ *)
+type memoire = (value * value) list 
 
 (*PRIMITIVES*)
 let pi1 prim x = 
@@ -64,7 +70,7 @@ let rec i_arg a =
     | ASTArg (s, _) -> s
 and i_args al = List.map i_arg al
 
-(*EXPR. app appr *)
+(*EXPR*)
 let rec i_expr rho omg e =
   match e with
     | ASTNum n -> InZ(n)
@@ -98,7 +104,12 @@ and i_exprs rho omg es = List.map (i_expr rho omg) es
 (*STAT*)
 let i_stat rho omg s =
   match s with
-  ASTEcho e -> match i_expr rho omg e with InZ n -> Flux (n, omg) | _ -> failwith "Error : stat"
+    | ASTEcho e -> match i_expr rho omg e with InZ n -> Flux (n, omg) | _ -> failwith "Error : stat"
+(*    | ASTSet(s, e) -> fprintf fmt "set(%s,%a)" s pp_expr e
+    | ASTIf2(e, b1, b2) -> fprintf fmt "if2(%a,%a,%a)" pp_expr e pp_block b1 pp_block b2
+    | ASTWhile(e, b) -> fprintf fmt "while(%a,%a)" pp_expr e pp_block b
+    | ASTCall(s, es) -> fprintf fmt "call(%s,%a)" s pp_exprs es 
+*)
 
 (*DEF*)
 let i_def rho omg d = 

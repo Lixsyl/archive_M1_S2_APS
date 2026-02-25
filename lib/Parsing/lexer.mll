@@ -31,6 +31,12 @@ rule token = parse
   | "or"             { OR   }
   | "bool"           { BOOL }
   | "int"            { INT  }
+  | "VAR"            { VAR  } (*APS1*)
+  | "PROC"           { PROC } (*APS1*)
+  | "SET"            { SET  } (*APS1*)
+  | "IF"             { IF2   } (*APS1*)
+  | "WHILE"          { WHILE } (*APS1*)
+  | "CALL"           { CALL } (*APS1*)
   | ['0'-'9']+('.'['0'-'9'])? as lxm { NUM(int_of_string lxm) }
   | ['a'-'z']['a'-'z''A'-'Z''0'-'9']* as lxm { IDENT(lxm) }
   | eof              { raise Eof }

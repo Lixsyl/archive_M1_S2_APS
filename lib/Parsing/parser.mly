@@ -20,6 +20,7 @@ open Ast
 %token INT BOOL
 %token PV DP VIR STAR ARR 
 %token CONST FUN REC IF AND OR 
+%token VAR PROC SET IF2 WHILE CALL (*APS1*)
 
 %type <Ast.type1> type1
 %type <Ast.type1 list> types
@@ -30,22 +31,31 @@ open Ast
 %type <Ast.stat> stat
 %type <Ast.def> def
 %type <Ast.cmd> cmds
-%type <Ast.cmd list> prog
+%type <Ast.block> block
+%type <Ast.block> prog
 
 %start prog
 
 %%
-prog: LBRA cmds RBRA    { [$2] } 
+prog: block    { $1 } 
+;
+
+block: LBRA cmds RBRA   { ASTCmds ($2) } 
 ;
 
 cmds:
   stat                  { ASTStat ($1) }
-| def PV cmds           { ASTDef ($1, $3)}
+| def PV cmds           { ASTDef ($1, $3) }
+| stat PV cmds          { ASTStats ($1, $3) }
 ;
+
 def:
-  CONST IDENT type1 expr                { ASTConst($2, $3, $4) }
-| FUN IDENT type1 LBRA args RBRA expr   { ASTFun($2, $3, $5, $7) }
-| FUN REC IDENT type1 LBRA args RBRA expr   { ASTFunRec($3, $4, $6, $8) }
+  CONST IDENT type1 expr                    { ASTConst ($2, $3, $4) }
+| FUN IDENT type1 LBRA args RBRA expr       { ASTFun ($2, $3, $5, $7) }
+| FUN REC IDENT type1 LBRA args RBRA expr   { ASTFunRec ($3, $4, $6, $8) }
+| VAR IDENT type1                           { ASTVar ($2, $3) }
+| PROC IDENT args block                     { ASTProc ($2, $3, $4) }
+| PROC REC IDENT args block                 { ASTProcRec ($3, $4, $5) }
 ;
 
 type1:
@@ -70,16 +80,20 @@ args :
 
 stat:
   ECHO expr             { ASTEcho($2) }
+| SET IDENT expr        { ASTSet ($2, $3) }
+| IF expr block block   { ASTIf2 ($2, $3, $4) }
+| WHILE expr block      { ASTWhile ($2, $3) }
+| CALL IDENT exprs      { ASTCall ($2, $3) }
 ;
 
 expr:
-  NUM                   { ASTNum($1) }
-| IDENT                 { ASTId($1) }
-| LPAR IF expr expr expr RPAR  { ASTIf($3, $4, $5) }
-| LPAR AND expr expr RPAR      { ASTAnd($3, $4) }
-| LPAR OR expr expr RPAR       { ASTOr($3, $4) }
-| LBRA args RBRA expr   { ASTAbs($2, $4) }
-| LPAR expr exprs RPAR  { ASTApp($2, $3) }
+  NUM                           { ASTNum($1) }
+| IDENT                         { ASTId($1) }
+| LPAR IF expr expr expr RPAR   { ASTIf($3, $4, $5) }
+| LPAR AND expr expr RPAR       { ASTAnd($3, $4) }
+| LPAR OR expr expr RPAR        { ASTOr($3, $4) }
+| LBRA args RBRA expr           { ASTAbs($2, $4) }
+| LPAR expr exprs RPAR          { ASTApp($2, $3) }
 ;
 
 exprs :

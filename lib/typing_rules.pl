@@ -18,11 +18,18 @@ contexte_initial([
 arrow(_,_).
 
 /* Programmes */
-type_prog(prog(CS)) :- 
+type_prog(prog(B)) :- 
     contexte_initial(G),
+    type_block(G,B,void).
+
+/* Blocks */
+type_block(G,block(CS),void) :- 
     type_cmd(G,CS,void).
 
 /* Suite de commandes */
+type_cmd(G,stats(S,CS),void) :- 
+    type_stat(G,S,void),
+    type_cmd(G,CS,void). 
 type_cmd(G,def(D,CS),void) :- 
     type_def(G,D,G2),
     type_cmd(G2,CS,void). 
@@ -42,9 +49,37 @@ type_def(G,funrec(X,T,L,E),G2) :-
     append(G,[(X,arrow(LT,T))], G2),
     append(G2,L,G3),
     type_expr(G3,E,T).
+type_def(G,var(X,int),G2) :- 
+    append(G,[(X,int)], G2).
+type_def(G,var(X,bool),G2) :- 
+    append(G,[(X,bool)], G2).
+type_def(G,proc(X,L,B),G3) :- 
+    append(G,L,G2),
+    type_block(G2,B,void),
+    list_types(L,LT),
+    append(G,[(X,arrow(LT,void))], G3).
+type_def(G,procrec(X,L,B),G2) :- 
+    list_types(L,LT),
+    append(G,[(X,arrow(LT,void))], G2),
+    append(G2,L,G3),
+    type_block(G3,B,void).
 
-/* Intruction */
+/* Intructions */
 type_stat(G,echo(E),void) :- type_expr(G,E,int).
+type_stat(G,set(X,E),void) :- 
+    member((X,T),G),
+    type_expr(G,E,T). 
+type_stat(G,if2(E,B1,B2),void) :- 
+    type_expr(G,E,bool),
+    type_block(G,B1,void),
+    type_block(G,B2,void).
+type_stat(G,while(E,B),void) :- 
+    type_expr(G,E,bool),
+    type_block(G,B,void).
+type_stat(G,call(X,LE),void) :- 
+    member((X,T),G),
+    arrow(LT,void) = T,
+    types_expr_list(G,LE,LT).
 
 /* Expressions */
 type_expr(_,num(_),int).
