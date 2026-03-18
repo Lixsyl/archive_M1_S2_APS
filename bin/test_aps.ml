@@ -10,7 +10,10 @@ let l_test_0 = [(testfile_name 0 0, "OK");
                 (testfile_name 0 5, "OK");
                 (testfile_name 0 6, "OK")]
 
-let l_test_1 = [(testfile_name 1 7, "OK")]
+let l_test_1 = [(testfile_name 1 7, "OK");
+                (testfile_name 1 8, "OK");
+                (testfile_name 1 9, "OK");
+                (testfile_name 1 10, "OK")]
 
 
 let test_prologTerm (l_test : string list) =
