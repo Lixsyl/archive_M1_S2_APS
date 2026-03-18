@@ -10,6 +10,8 @@ let l_test_0 = [(testfile_name 0 0, "OK");
                 (testfile_name 0 5, "OK");
                 (testfile_name 0 6, "OK")]
 
+let l_test_1 = [(testfile_name 1 7, "OK")]
+
 
 let test_prologTerm (l_test : string list) =
 List.fold_right
@@ -27,7 +29,7 @@ List.fold_right
       let s = Format.flush_str_formatter () in
       match cmd_typ s with
       | Ok(s,_) ->  (Format.printf "%s |\t Résultat du typeur : %s\t Résultat attendu : %s\n" fname s expected); 
-                    if s = "OK" then let p = get_prog fname in Format.printf "%s |\t Résultat : %s\n" fname (print_flux (i_prog p)) ;
+                    if s = "OK" then let p = get_prog fname in Format.printf "%s |\t Résultat : %s\n" fname (print_flux (let (_, res) = i_prog p in res)) ;
       | Error (`Msg m) -> print_endline m
 
 ) l_test ()
@@ -38,4 +40,9 @@ let _ =
   test_prologTerm (fst (List.split l_test_0 ));
   print_endline "- Test du typeur\n";
   test_typeur l_test_0;
+  Format.printf "========== Tests de APS 1 ==========\n";
+  Format.printf "- Test de PrologTerm\n";
+  test_prologTerm (fst (List.split l_test_1 ));
+  print_endline "- Test du typeur\n";
+  test_typeur l_test_1;
 

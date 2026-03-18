@@ -1,0 +1,4 @@
+[
+    PROC x [x1 : int] [ VAR y int ; SET y 3 ] ;
+    CALL x 1
+]

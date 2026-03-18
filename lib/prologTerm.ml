@@ -66,6 +66,7 @@ and pp_cmd fmt c =
     | ASTDef(d, co) -> fprintf fmt "def(%a,%a)" pp_def d pp_cmd co
     | ASTStats(s, co) -> fprintf fmt "stats(%a,%a)" pp_stat s pp_cmd co
 
+(*BLOCK*)
 and pp_block fmt b = 
   match b with
     | ASTCmds c -> fprintf fmt "block(%a)" pp_cmd c
