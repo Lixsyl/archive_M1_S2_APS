@@ -1,5 +1,6 @@
 [
     VAR y int ;
     PROC x [x1 : int] [ SET y 3 ] ;
-    CALL x 1
+    CALL x 1 ;
+    ECHO y
 ]

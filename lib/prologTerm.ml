@@ -47,7 +47,7 @@ let rec pp_stat fmt s =
     | ASTSet(s, e) -> fprintf fmt "set(%s,%a)" s pp_expr e
     | ASTIf2(e, b1, b2) -> fprintf fmt "if2(%a,%a,%a)" pp_expr e pp_block b1 pp_block b2
     | ASTWhile(e, b) -> fprintf fmt "while(%a,%a)" pp_expr e pp_block b
-    | ASTCall(s, es) -> fprintf fmt "call(%s,%a)" s pp_exprs es
+    | ASTCall(s, es) -> fprintf fmt "call(%s,[%a])" s pp_exprs es
 
 (*DEF*)
 and pp_def fmt d = 

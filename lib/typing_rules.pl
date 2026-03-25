@@ -103,10 +103,10 @@ type_expr(G,abs(L,E),arrow(LT,T)) :-
     type_expr(G2,E,T),
     list_types(L,LT).
 
-/* AUX list_types */
+/* AUX list_types : extrait les types d'une liste de paires (id, type) */
 list_types([],[]).
 list_types([(_,X)|T],[X|XS]) :- list_types(T,XS).
-/* AUX types_expr_list */
+/* AUX types_expr_list : vérifie les types d'une liste d'expressions */
 types_expr_list(_,[],[]).
 types_expr_list(G, [E|LE], [T|LT]) :-
     type_expr(G, E, T),
