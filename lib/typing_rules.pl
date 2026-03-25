@@ -50,24 +50,26 @@ type_def(G,funrec(X,T,L,E),G2) :-
     append(G2,L,G3),
     type_expr(G3,E,T).
 type_def(G,var(X,int),G2) :- 
-    append(G,[(X,int)], G2).
+    append(G,[(X,ref(int))], G2).
 type_def(G,var(X,bool),G2) :- 
-    append(G,[(X,bool)], G2).
+    append(G,[(X,ref(bool))], G2).
 type_def(G,proc(X,L,B),G3) :- 
-    append(G,L,G2),
+    maplist(funA, L, LR),
+    append(G,LR,G2),
     type_block(G2,B,void),
-    list_types(L,LT),
+    list_types(LR,LT),
     append(G,[(X,arrow(LT,void))], G3).
 type_def(G,procrec(X,L,B),G2) :- 
-    list_types(L,LT),
+    maplist(funA, L, LR),
+    list_types(LR,LT),
     append(G,[(X,arrow(LT,void))], G2),
-    append(G2,L,G3),
+    append(G2,LR,G3),
     type_block(G3,B,void).
 
 /* Intructions */
 type_stat(G,echo(E),void) :- type_expr(G,E,int).
 type_stat(G,set(X,E),void) :- 
-    member((X,T),G),
+    member((X,ref(T)),G),
     type_expr(G,E,T). 
 type_stat(G,if2(E,B1,B2),void) :- 
     type_expr(G,E,bool),
@@ -79,10 +81,15 @@ type_stat(G,while(E,B),void) :-
 type_stat(G,call(X,LE),void) :- 
     member((X,T),G),
     arrow(LT,void) = T,
-    types_expr_list(G,LE,LT).
+    types_exprp_list(G,LE,LT).
+
+/* Parametres d’appel */
+type_expar(G,adr(X),ref(T)) :- member((X,ref(T)),G).
+type_expar(G,E,T) :- type_expr(G,E,T).  
 
 /* Expressions */
 type_expr(_,num(_),int).
+type_expr(G,ident(X),T) :- member((X,ref(T)),G).
 type_expr(G,ident(X),T) :- member((X,T),G).
 type_expr(G,if(E1,E2,E3),T) :- 
     type_expr(G,E1,bool),
@@ -111,3 +118,20 @@ types_expr_list(_,[],[]).
 types_expr_list(G, [E|LE], [T|LT]) :-
     type_expr(G, E, T),
     types_expr_list(G, LE, LT).
+/* AUX A : 
+A(_,[],[]).
+A(G,[(E,T)|L],LR) :- 
+    type_expr(G,E,T), 
+    append(LR2, [NE], LR),
+    A(G,L,LR2).
+
+    maplist(double, L, Result)
+*/
+funA((var2(X),T),(X,ref(T))).
+funA((X,T),(X,T)).
+
+/* AUX types_exprp_list : vérifie les types d'une liste de param */
+types_exprp_list(_,[],[]).
+types_exprp_list(G, [E|LE], [T|LT]) :-
+    type_expar(G, E, T),
+    types_exprp_list(G, LE, LT).

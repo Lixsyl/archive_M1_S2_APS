@@ -37,6 +37,8 @@ rule token = parse
   | "IF"             { IF2   } (*APS1*)
   | "WHILE"          { WHILE } (*APS1*)
   | "CALL"           { CALL } (*APS1*)
+  | "var"            { VAR2  } (*APS1a*)
+  | "adr"            { ADR } (*APS1a*)
   | ['0'-'9']+('.'['0'-'9'])? as lxm { NUM(int_of_string lxm) }
   | ['a'-'z']['a'-'z''A'-'Z''0'-'9']* as lxm { IDENT(lxm) }
   | eof              { raise Eof }

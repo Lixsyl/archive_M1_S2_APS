@@ -1,0 +1,6 @@
+[
+    CONST y int 2;
+    PROC x [x1 : int, y1 : int] [ SET y 5 ] ;
+    CALL x 1 y ;
+    ECHO y
+]

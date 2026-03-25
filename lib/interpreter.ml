@@ -41,7 +41,7 @@ let rec env_updates keys values env =
 (*MEMOIRE : unchecked InA -> InZ *)
 type memoire = (int * value) list 
 let mem_init = []
-let find_var_mem x mem = 
+let find_var_mem x (mem : memoire) = 
   match List.assoc_opt x mem with
     | Some v -> v
     | None -> failwith ("Error : variable not found")
@@ -77,6 +77,13 @@ let rec i_arg a =
     | ASTArg (s, _) -> s
 and i_args al = List.map i_arg al
 
+(*ARGP*)
+let rec i_argp a =
+  match a with
+    | ASTArgp (s, _) -> s
+    | ASTArgVar (s, _) -> s
+and i_argsp al = List.map i_argp al
+
 (*EXPR*)
 let rec i_expr rho sigma e =
   match e with
@@ -107,6 +114,13 @@ let rec i_expr rho sigma e =
     | ASTAbs(al, e) -> InF(e, i_args al, rho)
 and i_exprs rho sigma es = List.map (i_expr rho sigma) es
 
+(*EXPRP*)
+let rec i_exprp rho sigma e =
+  match e with
+    | ASTVal ex -> i_expr rho sigma ex
+    | ASTRef s -> find_var s rho
+and i_exprsp rho sigma es = List.map (i_exprp rho sigma) es
+
 (*DEF*)
 let i_def rho sigma d = 
   match d with 
@@ -114,8 +128,8 @@ let i_def rho sigma d =
     | ASTFun(s, _, al, e) -> let v = InF(e, i_args al, rho) in (env_update s v rho, sigma)
     | ASTFunRec(s, _, al, e) -> let v = InFR(e, s, i_args al, rho) in (env_update s v rho, sigma)
     | ASTVar(s, _) -> let (a, sigma2) = allocation sigma in (env_update s (InA a) rho, sigma2)
-    | ASTProc(s, al, b) -> let v = InP(b, i_args al, rho) in (env_update s v rho, sigma)
-    | ASTProcRec(s, al, b) -> let v = InPR(b, s, i_args al, rho) in (env_update s v rho, sigma)
+    | ASTProc(s, al, b) -> let v = InP(b, i_argsp al, rho) in (env_update s v rho, sigma)
+    | ASTProcRec(s, al, b) -> let v = InPR(b, s, i_argsp al, rho) in (env_update s v rho, sigma)
 
 (*STAT*)
 let rec i_stat rho sigma omg s =
@@ -131,10 +145,10 @@ let rec i_stat rho sigma omg s =
                             then (let (sigma2, omg2) = i_block rho sigma omg b in i_stat rho sigma2 omg2 s)
                             else (sigma, omg)
     | ASTCall(s, es) -> (match find_var s rho with 
-                        | InP(b, al, rho2) -> let v = (i_exprs rho sigma es) 
+                        | InP(b, al, rho2) -> let v = (i_exprsp rho sigma es) 
                                               in let rho3 = env_updates al v rho2 
                                               in i_block rho3 sigma omg b
-                        | InPR(b, s, al, rho2) -> let v = (i_exprs rho sigma es) 
+                        | InPR(b, s, al, rho2) -> let v = (i_exprsp rho sigma es) 
                                                   in let rho3 = env_update s (InPR(b, s, al, rho2)) (env_updates al v rho2) 
                                                   in i_block rho3 sigma omg b
                         | _ -> failwith "Error : expression is not a procedure")
