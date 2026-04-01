@@ -12,6 +12,7 @@
 type type1 = 
     ASTInt
   | ASTBool
+  | ASTVec of type1
   | ASTTypeT of type1 list * type1
 
 (*ARG*)
@@ -32,16 +33,25 @@ type expr =
   | ASTOr of expr * expr
   | ASTApp of expr * expr list
   | ASTAbs of arg list * expr
+  | ASTAlloc of expr
+  | ASTLen of expr
+  | ASTNth of expr * expr
+  | ASTVset of expr * expr * expr
 
 (*EXPRP*)
 type exprp = 
     ASTVal of expr
   | ASTRef of string
 
+(*LVAL*)
+type lval =
+    ASTId of string
+  | ASTNth of lval * expr
+
 (*STAT*)
 type stat =
     ASTEcho of expr
-  | ASTSet of string * expr
+  | ASTSet of lval * expr
   | ASTIf2 of expr * block * block
   | ASTWhile of expr * block
   | ASTCall of string * exprp list

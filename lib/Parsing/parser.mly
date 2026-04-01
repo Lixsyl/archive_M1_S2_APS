@@ -22,6 +22,7 @@ open Ast
 %token CONST FUN REC IF AND OR 
 %token VAR PROC SET IF2 WHILE CALL (*APS1*)
 %token VAR2 ADR (*APS1a*)
+%token ALLOC LEN NTH VSET VEC (*APS2*)
 
 %type <Ast.type1> type1
 %type <Ast.type1 list> types
@@ -33,6 +34,7 @@ open Ast
 %type <Ast.expr list> exprs
 %type <Ast.exprp> exprp
 %type <Ast.exprp list> exprsp
+%type <Ast.lval> lval
 %type <Ast.stat> stat
 %type <Ast.def> def
 %type <Ast.cmd> cmds
@@ -66,6 +68,7 @@ def:
 type1:
   INT               { ASTInt }
 | BOOL              { ASTBool }
+| VEC type1         { ASTVec($2) }
 | LPAR types ARR type1 RPAR     { ASTTypeT($2, $4) }
 ;
 
@@ -95,10 +98,15 @@ argsp:
 
 stat:
   ECHO expr             { ASTEcho($2) }
-| SET IDENT expr        { ASTSet ($2, $3) }
+| SET lval expr        { ASTSet ($2, $3) }
 | IF2 expr block block  { ASTIf2 ($2, $3, $4) }
 | WHILE expr block      { ASTWhile ($2, $3) }
 | CALL IDENT exprsp     { ASTCall ($2, $3) }
+;
+
+lval:
+  IDENT                    { ASTId($1) }
+| LPAR NTH lval expr RPAR  { ASTNth($3, $4) }
 ;
 
 exprp:
@@ -119,6 +127,10 @@ expr:
 | LPAR OR expr expr RPAR        { ASTOr($3, $4) }
 | LBRA args RBRA expr           { ASTAbs($2, $4) }
 | LPAR expr exprs RPAR          { ASTApp($2, $3) }
+| LPAR ALLOC expr RPAR          { ASTAlloc($3) }
+| LPAR LEN expr RPAR            { ASTLen($3) }
+| LPAR NTH expr expr RPAR       { ASTNth($3, $4) }
+| LPAR VSET expr expr expr RPAR { ASTVset($3, $4, $5) }
 ;
 
 exprs:

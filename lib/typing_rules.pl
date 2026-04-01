@@ -69,7 +69,7 @@ type_def(G,procrec(X,L,B),G2) :-
 /* Intructions */
 type_stat(G,echo(E),void) :- type_expr(G,E,int).
 type_stat(G,set(X,E),void) :- 
-    member((X,ref(T)),G),
+    type_expr(G,X,T),
     type_expr(G,E,T). 
 type_stat(G,if2(E,B1,B2),void) :- 
     type_expr(G,E,bool),
@@ -109,6 +109,16 @@ type_expr(G,abs(L,E),arrow(LT,T)) :-
     append(G,L,G2),
     type_expr(G2,E,T),
     list_types(L,LT).
+type_expr(G,alloc(E),vec(T)) :- type_expr(G,E,int).
+type_expr(G,len(E),int) :- type_expr(G,E,vec(_)).
+type_expr(G,nth(E1,E2),T) :- 
+    type_expr(G,E1,vec(T)),
+    type_expr(G,E2,int).
+type_expr(G,vset(E1,E2,E3),vec(T)) :- 
+    type_expr(G,E1,vec(T)),
+    type_expr(G,E2,int),
+    type_expr(G,E3,T).
+
 
 /* AUX list_types : extrait les types d'une liste de paires (id, type) */
 list_types([],[]).
@@ -118,18 +128,9 @@ types_expr_list(_,[],[]).
 types_expr_list(G, [E|LE], [T|LT]) :-
     type_expr(G, E, T),
     types_expr_list(G, LE, LT).
-/* AUX A : 
-A(_,[],[]).
-A(G,[(E,T)|L],LR) :- 
-    type_expr(G,E,T), 
-    append(LR2, [NE], LR),
-    A(G,L,LR2).
-
-    maplist(double, L, Result)
-*/
+/* AUX A */
 funA((var2(X),T),(X,ref(T))).
 funA((X,T),(X,T)).
-
 /* AUX types_exprp_list : vérifie les types d'une liste de param */
 types_exprp_list(_,[],[]).
 types_exprp_list(G, [E|LE], [T|LT]) :-

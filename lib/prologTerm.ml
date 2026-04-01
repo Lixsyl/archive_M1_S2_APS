@@ -19,6 +19,7 @@ let rec pp_type fmt t =
   match t with
     | ASTInt -> fprintf fmt "int"
     | ASTBool -> fprintf fmt "bool"
+    | ASTVec t -> fprintf fmt "vec(%a)" pp_type t
     | ASTTypeT(ts, t) -> fprintf fmt "arrow([%a],%a)" pp_types ts pp_type t
 and pp_types fmt ts = pp_lst_cma pp_type fmt ts
 
@@ -45,6 +46,10 @@ let rec pp_expr fmt e =
     | ASTOr(e1, e2) -> fprintf fmt "or(%a,%a)" pp_expr e1 pp_expr e2
     | ASTApp(e, es) -> fprintf fmt "app(%a,[%a])" pp_expr e  pp_exprs es
     | ASTAbs(al, e) -> fprintf fmt "abs([%a],%a)" pp_args al  pp_expr e
+    | ASTAlloc e -> fprintf fmt "alloc(%a)" pp_expr e
+    | ASTLen e -> fprintf fmt "len(%a)" pp_expr e
+    | ASTNth(e1, e2) -> fprintf fmt "nth(%a,%a)" pp_expr e1 pp_expr e2
+    | ASTVset(e1, e2, e3) -> fprintf fmt "vset(%a,%a,%a)" pp_expr e1 pp_expr e2 pp_expr e3
 and pp_exprs fmt es = pp_lst_cma pp_expr fmt es
 
 (*EXPRP*)
@@ -54,11 +59,17 @@ let rec pp_exprp fmt e =
     | ASTRef s -> fprintf fmt "adr(%s)" s
 and pp_exprsp fmt es = pp_lst_cma pp_exprp fmt es
 
+(*LVAL*)
+let rec pp_lval fmt l =
+  match l with
+    | ASTId s -> fprintf fmt "ident(%s)" s
+    | ASTNth(l, e) -> fprintf fmt "lnth(%a,%a)" pp_lval l pp_expr e
+
 (*STAT*)
 let rec pp_stat fmt s = 
   match s with
     | ASTEcho e -> fprintf fmt "echo(%a)" pp_expr e
-    | ASTSet(s, e) -> fprintf fmt "set(%s,%a)" s pp_expr e
+    | ASTSet(l, e) -> fprintf fmt "set(%a,%a)" pp_lval l pp_expr e
     | ASTIf2(e, b1, b2) -> fprintf fmt "if2(%a,%a,%a)" pp_expr e pp_block b1 pp_block b2
     | ASTWhile(e, b) -> fprintf fmt "while(%a,%a)" pp_expr e pp_block b
     | ASTCall(s, es) -> fprintf fmt "call(%s,[%a])" s pp_exprsp es
