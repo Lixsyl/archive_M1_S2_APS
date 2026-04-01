@@ -43,7 +43,8 @@ let rec env_updates keys values env =
 type memoire = (value * value) list 
 let mem_init = []
 let find_var_mem x (mem : memoire) = 
-  match List.assoc_opt x mem with
+  let x_val = InA x in
+  match List.assoc_opt x_val mem with
     | Some v -> v
     | None -> failwith ("Error : variable not found")
 
@@ -52,9 +53,10 @@ let new_address () = let a = !count in count := !count + 1; a
 let allocation (mem : memoire) : (value * memoire) = 
   let newA = InA(new_address()) 
   in (newA, (newA, None) :: mem )
-let modification (mem : memoire) (a : value) (v : value) : memoire = 
-  if List.exists (fun (ad, _) -> ad = a) mem then
-    List.map(fun (ad, value) -> if ad = a then (ad, v) else (ad, value) ) mem
+let modification (mem : memoire) (a : int) (v : value) : memoire = 
+  let a_val = InA a in
+  if List.exists (fun (ad, _) -> ad = a_val) mem then
+    List.map(fun (ad, value) -> if ad = a_val then (ad, v) else (ad, value) ) mem
   else
     failwith ("Error : adress not found")
 
@@ -101,34 +103,34 @@ let rec i_expr rho sigma e =
     | ASTId ("true") -> (InZ(1), sigma)
     | ASTId ("false") -> (InZ(0), sigma)
     | ASTId x -> (match find_var x rho with
-                    | InA _ -> (find_var_mem (find_var x rho) sigma, sigma)
+                    | InA a -> (find_var_mem a sigma, sigma)
                     | v -> (v, sigma))
-    | ASTIf(econd, econs, ealt) ->  let (cond,_) = i_expr rho sigma econd in
-                                    let (cons,_) = i_expr rho sigma econs in
-                                    let (alt,_) = i_expr rho sigma ealt in
-                                    if cond = InZ(1) then (cons, sigma) else (alt, sigma)
-    | ASTAnd(e1, e2) -> let (ex1,_) = i_expr rho sigma e1 in
-                        let (ex2,_) = i_expr rho sigma e2 in
-                        if ex1 = InZ(1) then (ex2, sigma) else (InZ(0), sigma)
-    | ASTOr(e1, e2) -> let (ex1,_) = i_expr rho sigma e1 in
-                        let (ex2,_) = i_expr rho sigma e2 in
-                        if ex1 = InZ(1) then (InZ(1), sigma) else (ex2, sigma)
+    | ASTIf(econd, econs, ealt) ->  let (cond,sigma2) = i_expr rho sigma econd in
+                                    let (cons,sigma3) = i_expr rho sigma2 econs in
+                                    let (alt,sigma4) = i_expr rho sigma3 ealt in
+                                    if cond = InZ(1) then (cons, sigma4) else (alt, sigma4)
+    | ASTAnd(e1, e2) -> let (ex1,sigma2) = i_expr rho sigma e1 in
+                        let (ex2,sigma3) = i_expr rho sigma2 e2 in
+                        if ex1 = InZ(1) then (ex2, sigma3) else (InZ(0), sigma3)
+    | ASTOr(e1, e2) -> let (ex1,sigma2) = i_expr rho sigma e1 in
+                        let (ex2,sigma3) = i_expr rho sigma2 e2 in
+                        if ex1 = InZ(1) then (InZ(1), sigma3) else (ex2, sigma3)
     | ASTApp(ASTId("not"), [e]) ->  (match i_expr rho sigma e with 
-                                      | (InZ n,_) -> (InZ(pi1 "not" n), sigma)
+                                      | (InZ n, sigma2) -> (InZ(pi1 "not" n), sigma2)
                                       | _ -> failwith "Error : prim not")
     | ASTApp(ASTId s, [e1; e2]) when s = "eq" || s = "lt" || s = "add" || s = "sub" || s = "mul" || s = "div" ->
-        (match i_expr rho sigma e1, i_expr rho sigma e2 with 
-          | (InZ n1, _), (InZ n2, _) -> (InZ(pi2 s n1 n2), sigma)
-          | _ -> failwith "Error : binary prim")
+        let (n1, sigma2) = i_expr rho sigma e1 in
+        let (n2, sigma3) = i_expr rho sigma2 e2 in
+        (match n1, n2 with 
+            | (InZ n1, InZ n2) -> (InZ(pi2 s n1 n2), sigma3)
+            | _ -> failwith "Error : binary prim")
     | ASTApp(e, es) ->  (match i_expr rho sigma e with 
-                          | (InF(fe, fal, frho), _) ->  let v = (i_exprs rho sigma es) in 
-                                                        let rho2 = env_updates fal v frho in
-                                                        let (res, _) = i_expr rho2 sigma fe in 
-                                                        (res, sigma)
-                          | (InFR(fe, fs, fal, frho), _) -> let v = (i_exprs rho sigma es) in 
+                          | (InF(fe, fal, frho), sigma2) -> let (v, sigma3) = (i_exprs rho sigma2 es) in 
+                                                            let rho2 = env_updates fal v frho in
+                                                            i_expr rho2 sigma3 fe
+                          | (InFR(fe, fs, fal, frho), sigma2) -> let (v, sigma3) = (i_exprs rho sigma2 es) in 
                                                             let rho2 = env_update fs (InFR(fe, fs, fal, frho)) (env_updates fal v frho) in
-                                                            let (res, _) = i_expr rho2 sigma fe in 
-                                                            (res, sigma)
+                                                            i_expr rho2 sigma3 fe
                           | _ -> failwith "Error : expression is not a function")
     | ASTAbs(al, e) -> (InF(e, i_args al, rho), sigma)
     | ASTAlloc e -> (match i_expr rho sigma e with 
@@ -138,26 +140,28 @@ let rec i_expr rho sigma e =
                     | (InB(_, n), sigma2) -> (InZ n, sigma2)
                     | _ -> failwith "Error : len")
     | ASTNth(e1, e2) -> (match i_expr rho sigma e1 with 
-                          | (InB(a, _), sigma2) -> (match i_expr rho sigma2 e2 with 
-                                                      | (InZ i, sigma3) -> 
-                                                          (match a with
-                                                          | InA a -> (find_var_mem (InA(a+i)) sigma3, sigma3)
-                                                          | _ -> failwith "Error : nth : a not inA") 
+                          | (InB(InA a, _), sigma2) -> (match i_expr rho sigma2 e2 with 
+                                                      | (InZ i, sigma3) -> (find_var_mem (a+i) sigma3, sigma3)
                                                       | _ -> failwith "Error : nth : e2 not inZ")
                           | _ -> failwith "Error : nth : e1 not inB")
     | ASTVset(e1, e2, e3) -> (match i_expr rho sigma e1 with 
-                              | (InB(a, n), sigma2) -> 
+                              | (InB(InA a, n), sigma2) -> 
                                     (match i_expr rho sigma2 e2 with 
                                     | (InZ i, sigma3) -> 
                                           (match i_expr rho sigma3 e3 with 
-                                          | (v, sigma4) -> 
-                                              (match a with
-                                              | InA a2 -> let sigma5 = modification sigma4 (InA(a2+i)) v 
-                                                                      in (InB(a, n), sigma5)
-                                              | _ -> failwith "Error : vset : a not inA"))
+                                          | (v, sigma4) -> let sigma5 = modification sigma4 (a+i) v 
+                                                            in (InB(InA a, n), sigma5))
                                     | _ -> failwith "Error : vset : e2 not inZ")
                               | _ -> failwith "Error : vset : e1 not inB")
-and i_exprs rho sigma es = List.map (fun e -> fst (i_expr rho sigma e)) es
+and i_exprs rho sigma es = 
+  let (sigma_fin, result) =
+    List.fold_left
+      (fun (sigma_acc, res) e ->
+         let (v, sigma2) = i_expr rho sigma_acc e in
+         (sigma2, v :: res))
+      (sigma, [])
+      es
+  in (List.rev result, sigma_fin)
 
 (*EXPRP*)
 let rec i_exprp rho sigma e =
@@ -166,10 +170,28 @@ let rec i_exprp rho sigma e =
     | ASTRef s -> find_var s rho
 and i_exprsp rho sigma es = List.map (i_exprp rho sigma) es
 
+(*LVAL*)
+let rec i_lval rho sigma l =
+  match l with
+    | ASTId s -> (match find_var s rho with
+                  | InA a -> (a, sigma)
+                  | _ -> failwith "Error : lval : variable is not an address")
+    | ASTNth(ASTId l, e) -> (match find_var l rho with 
+                            | InB(InA a, _) -> (match i_expr rho sigma e with 
+                                                | (InZ i, sigma2) -> (a+i, sigma2)
+                                                | _ -> failwith "Error : lval : e not inZ")
+                            | _ -> failwith "Error : lval : l not inB")
+    | ASTNth(l, e) -> let (a, sigma2) = i_lval rho sigma l in
+                      (match find_var_mem a sigma2 with 
+                        | InB(InA a2, _) -> (match i_expr rho sigma2 e with 
+                                        | (InZ i, sigma3) -> (a2+i, sigma3)
+                                        | _ -> failwith "Error : lval : e not inZ")
+                        | _ -> failwith "Error : lval : variable is not an array")
+
 (*DEF*)
 let i_def rho sigma d = 
   match d with 
-    | ASTConst(s, _, e) -> let (v, _) = i_expr rho sigma e in (env_update s v rho, sigma)
+    | ASTConst(s, _, e) -> let (v, sigma2) = i_expr rho sigma e in (env_update s v rho, sigma2)
     | ASTFun(s, _, al, e) -> let v = InF(e, i_args al, rho) in (env_update s v rho, sigma)
     | ASTFunRec(s, _, al, e) -> let v = InFR(e, s, i_args al, rho) in (env_update s v rho, sigma)
     | ASTVar(s, _) -> let (a, sigma2) = allocation sigma in (env_update s a rho, sigma2)
@@ -182,9 +204,9 @@ let rec i_stat rho sigma omg s =
     | ASTEcho e -> (match i_expr rho sigma e with 
                     | (InZ n, _) -> (sigma, Flux (n, omg)) 
                     | _ -> failwith "Error : echo")
-    (*| ASTSet(s, e) -> (match find_var s rho with 
-                      | InA a -> let (v, _) = i_expr rho sigma e in (modification sigma a v, omg) 
-                      | _ -> failwith "Error : set")*)
+    | ASTSet(l, e) -> let (v, sigma2) = i_expr rho sigma e in
+                      let (a, sigma3) = i_lval rho sigma2 l in
+                      (modification sigma3 a v, omg) 
     | ASTIf2(e, b1, b2) ->  let (cond, _) = i_expr rho sigma e 
                             in if cond = InZ(1) then i_block rho sigma omg b1 else i_block rho sigma omg b2
     | ASTWhile(e, b) -> let (cond, _) = i_expr rho sigma e 

@@ -69,8 +69,8 @@ type_def(G,procrec(X,L,B),G2) :-
 /* Intructions */
 type_stat(G,echo(E),void) :- type_expr(G,E,int).
 type_stat(G,set(X,E),void) :- 
-    type_expr(G,X,T),
-    type_expr(G,E,T). 
+    type_expar(G,X,ref(T)),
+    type_expar(G,E,T). 
 type_stat(G,if2(E,B1,B2),void) :- 
     type_expr(G,E,bool),
     type_block(G,B1,void),
@@ -109,7 +109,7 @@ type_expr(G,abs(L,E),arrow(LT,T)) :-
     append(G,L,G2),
     type_expr(G2,E,T),
     list_types(L,LT).
-type_expr(G,alloc(E),vec(T)) :- type_expr(G,E,int).
+type_expr(G,alloc(E),vec(_T)) :- type_expr(G,E,int).
 type_expr(G,len(E),int) :- type_expr(G,E,vec(_)).
 type_expr(G,nth(E1,E2),T) :- 
     type_expr(G,E1,vec(T)),
