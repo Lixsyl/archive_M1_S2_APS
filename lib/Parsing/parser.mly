@@ -24,6 +24,7 @@ open Ast
 %token VAR2 ADR (*APS1a*)
 %token ALLOC LEN NTH VSET VEC (*APS2*)
 
+%type <Ast.stype> stype
 %type <Ast.type1> type1
 %type <Ast.type1 list> types
 %type <Ast.arg> arg
@@ -60,16 +61,20 @@ def:
   CONST IDENT type1 expr                    { ASTConst ($2, $3, $4) }
 | FUN IDENT type1 LBRA args RBRA expr       { ASTFun ($2, $3, $5, $7) }
 | FUN REC IDENT type1 LBRA args RBRA expr   { ASTFunRec ($3, $4, $6, $8) }
-| VAR IDENT type1                           { ASTVar ($2, $3) }
+| VAR IDENT stype                           { ASTVar ($2, $3) }
 | PROC IDENT LBRA argsp RBRA block           { ASTProc ($2, $4, $6) }
 | PROC REC IDENT LBRA argsp RBRA block       { ASTProcRec ($3, $5, $7) }
 ;
 
+stype:
+  INT                   { ASTInt }
+| BOOL                  { ASTBool }
+| LPAR VEC stype RPAR   { ASTVec($3) }
+;
+
 type1:
-  INT               { ASTInt }
-| BOOL              { ASTBool }
-| VEC type1         { ASTVec($2) }
-| LPAR types ARR type1 RPAR     { ASTTypeT($2, $4) }
+  stype                       { ASTSType($1) }
+| LPAR types ARR type1 RPAR   { ASTTypeT($2, $4) }
 ;
 
 types:

@@ -7,7 +7,7 @@ type flux =
 let rec print_flux f =
   match f with
     | Eps -> ""
-    | Flux (x, xs) -> string_of_int x ^ print_flux xs
+    | Flux (x, xs) ->  print_flux xs ^ string_of_int x
 
 (*VALUE*)
 type value = 
@@ -61,11 +61,11 @@ let modification (mem : memoire) (a : int) (v : value) : memoire =
     failwith ("Error : adress not found")
 
 let allocn (mem : memoire) n : (value * memoire) = 
-  let (addr,_) = allocation mem in
+  let (addr, nmem) = allocation mem in
   let rec aux mem i =
     if i <= 0 then mem
     else let (_, mem2) = allocation mem in aux mem2 (i - 1)
-  in (addr, aux mem (n-1))
+  in (addr, aux nmem (n-1))
 
 (*PRIMITIVES*)
 let pi1 prim x = 

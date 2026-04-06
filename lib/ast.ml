@@ -9,10 +9,13 @@
 (* ========================================================================== *)
 
 (*TYPE*)
-type type1 = 
-    ASTInt
+type stype =
+  | ASTInt
   | ASTBool
-  | ASTVec of type1
+  | ASTVec of stype
+
+type type1 = 
+    ASTSType of stype
   | ASTTypeT of type1 list * type1
 
 (*ARG*)
@@ -61,7 +64,7 @@ and def =
     ASTConst of string * type1 * expr
   | ASTFun of string * type1 * arg list * expr
   | ASTFunRec of string * type1 * arg list * expr
-  | ASTVar of string * type1
+  | ASTVar of string * stype
   | ASTProc of string * argp list * block
   | ASTProcRec of string * argp list * block
 

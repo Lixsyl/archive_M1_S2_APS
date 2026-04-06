@@ -1,0 +1,10 @@
+[
+    CONST x (vec int) (alloc 2);
+    SET (nth x 0) 3;
+    ECHO (nth x 0);
+    SET (nth x 1) 6;
+    ECHO (nth x 1);
+    ECHO (len x);
+    CONST y (vec int) (vset x 1 9);
+    ECHO (nth x 1)
+]

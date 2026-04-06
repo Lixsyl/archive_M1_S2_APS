@@ -15,11 +15,14 @@ let sep_cma fmt () = fprintf fmt ", "
 let pp_lst_cma p = pp_print_list ~pp_sep:sep_cma p
 
 (*TYPE*)
-let rec pp_type fmt t =
+let rec pp_stype fmt t =
   match t with
     | ASTInt -> fprintf fmt "int"
     | ASTBool -> fprintf fmt "bool"
-    | ASTVec t -> fprintf fmt "vec(%a)" pp_type t
+    | ASTVec t -> fprintf fmt "vec(%a)" pp_stype t
+let rec pp_type fmt t =
+  match t with
+    | ASTSType st -> pp_stype fmt st
     | ASTTypeT(ts, t) -> fprintf fmt "arrow([%a],%a)" pp_types ts pp_type t
 and pp_types fmt ts = pp_lst_cma pp_type fmt ts
 
@@ -63,7 +66,7 @@ and pp_exprsp fmt es = pp_lst_cma pp_exprp fmt es
 let rec pp_lval fmt l =
   match l with
     | ASTId s -> fprintf fmt "ident(%s)" s
-    | ASTNth(l, e) -> fprintf fmt "lnth(%a,%a)" pp_lval l pp_expr e
+    | ASTNth(l, e) -> fprintf fmt "nth(%a,%a)" pp_lval l pp_expr e
 
 (*STAT*)
 let rec pp_stat fmt s = 
@@ -80,7 +83,7 @@ and pp_def fmt d =
     | ASTConst(s, t, e)-> fprintf fmt "const(%s,%a,%a)" s pp_type t pp_expr e
     | ASTFun(s, t, al, e) -> fprintf fmt "fun(%s,%a,[%a],%a)" s pp_type t pp_args al pp_expr e
     | ASTFunRec(s, t, al, e) -> fprintf fmt "funrec(%s,%a,[%a],%a)" s pp_type t pp_args al pp_expr e
-    | ASTVar(s, t)-> fprintf fmt "var(%s,%a)" s pp_type t
+    | ASTVar(s, t)-> fprintf fmt "var(%s,%a)" s pp_stype t
     | ASTProc(s, al, b) -> fprintf fmt "proc(%s,[%a],%a)" s pp_argsp al pp_block b
     | ASTProcRec(s, al, b) -> fprintf fmt "procrec(%s,[%a],%a)" s pp_argsp al pp_block b
 

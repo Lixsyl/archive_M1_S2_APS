@@ -71,6 +71,10 @@ type_stat(G,echo(E),void) :- type_expr(G,E,int).
 type_stat(G,set(X,E),void) :- 
     type_expar(G,X,ref(T)),
     type_expar(G,E,T). 
+type_stat(G,set(nth(X,E1),E2),void) :- 
+    type_expar(G,X,vec(T)),
+    type_expar(G,E1,int),
+    type_expar(G,E2,T). 
 type_stat(G,if2(E,B1,B2),void) :- 
     type_expr(G,E,bool),
     type_block(G,B1,void),
