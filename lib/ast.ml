@@ -51,6 +51,10 @@ type lval =
     ASTId of string
   | ASTNth of lval * expr
 
+(*RETURN*)
+type ret = 
+    ASTRet of expr
+
 (*STAT*)
 type stat =
     ASTEcho of expr
@@ -67,10 +71,13 @@ and def =
   | ASTVar of string * stype
   | ASTProc of string * argp list * block
   | ASTProcRec of string * argp list * block
+  | ASTFunP of string * type1 * arg list * block
+  | ASTFunRecP of string * type1 * arg list * block
 
 (*CMDS*)
 and cmd =
     ASTStat of stat
+  | ASTReturn of ret
   | ASTDef of def * cmd
   | ASTStats of stat * cmd
 

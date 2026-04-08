@@ -23,17 +23,21 @@ type_prog(prog(B)) :-
     type_block(G,B,void).
 
 /* Blocks */
-type_block(G,block(CS),void) :- 
-    type_cmd(G,CS,void).
+type_block(G,block(CS),T) :- 
+    type_cmd(G,CS,T).
 
 /* Suite de commandes */
-type_cmd(G,stats(S,CS),void) :- 
+type_cmd(G,stats(S,CS),T) :- 
     type_stat(G,S,void),
-    type_cmd(G,CS,void). 
-type_cmd(G,def(D,CS),void) :- 
+    type_cmd(G,CS,T). 
+type_cmd(G,stats(S,CS),T) :- 
+    type_stat(G,S,sumT(T,void)),
+    type_cmd(G,CS,T). 
+type_cmd(G,def(D,CS),T) :- 
     type_def(G,D,G2),
-    type_cmd(G2,CS,void). 
-type_cmd(G,stat(S),void) :- type_stat(G,S,void).
+    type_cmd(G2,CS,T). 
+type_cmd(G,stat(S),T) :- type_stat(G,S,T).
+type_cmd(G,ret(E),T) :- type_expr(G,E,T).
 
 /* Definitions */
 type_def(G,const(X,T,E),G2) :- 
@@ -65,6 +69,16 @@ type_def(G,procrec(X,L,B),G2) :-
     append(G,[(X,arrow(LT,void))], G2),
     append(G2,LR,G3),
     type_block(G3,B,void).
+type_def(G,funp(X,T,L,B),G3) :- 
+    append(G,L,G2),
+    type_block(G2,B,T),
+    list_types(L,LT),
+    append(G,[(X,arrow(LT,T))], G3).
+type_def(G,funrecp(X,T,L,B),G2) :- 
+    list_types(L,LT),
+    append(G,[(X,arrow(LT,T))], G2),
+    append(G2,L,G3),
+    type_block(G3,B,T).
 
 /* Intructions */
 type_stat(G,echo(E),void) :- type_expr(G,E,int).
@@ -75,13 +89,21 @@ type_stat(G,set(nth(X,E1),E2),void) :-
     type_expar(G,X,vec(T)),
     type_expar(G,E1,int),
     type_expar(G,E2,T). 
-type_stat(G,if2(E,B1,B2),void) :- 
+type_stat(G,if2(E,B1,B2),T) :- 
+    type_expr(G,E,bool),
+    type_block(G,B1,T),
+    type_block(G,B2,T).
+type_stat(G,if2(E,B1,B2),sumT(T,void)) :- 
     type_expr(G,E,bool),
     type_block(G,B1,void),
-    type_block(G,B2,void).
-type_stat(G,while(E,B),void) :- 
+    type_block(G,B2,T).
+type_stat(G,if2(E,B1,B2),sumT(T,void)) :- 
     type_expr(G,E,bool),
-    type_block(G,B,void).
+    type_block(G,B1,T),
+    type_block(G,B2,void).
+type_stat(G,while(E,B),sumT(T,void)) :- 
+    type_expr(G,E,bool),
+    type_block(G,B,T).
 type_stat(G,call(X,LE),void) :- 
     member((X,T),G),
     arrow(LT,void) = T,

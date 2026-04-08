@@ -23,6 +23,7 @@ open Ast
 %token VAR PROC SET IF2 WHILE CALL (*APS1*)
 %token VAR2 ADR (*APS1a*)
 %token ALLOC LEN NTH VSET VEC (*APS2*)
+%token RETURN (*APS3*)
 
 %type <Ast.stype> stype
 %type <Ast.type1> type1
@@ -38,6 +39,7 @@ open Ast
 %type <Ast.lval> lval
 %type <Ast.stat> stat
 %type <Ast.def> def
+%type <Ast.ret> ret
 %type <Ast.cmd> cmds
 %type <Ast.block> block
 %type <Ast.block> prog
@@ -53,8 +55,13 @@ block: LBRA cmds RBRA   { ASTCmds ($2) }
 
 cmds:
   stat                  { ASTStat ($1) }
+| ret                   { ASTReturn ($1) }
 | def PV cmds           { ASTDef ($1, $3) }
 | stat PV cmds          { ASTStats ($1, $3) }
+;
+
+ret:
+  RETURN expr           { ASTRet ($2) }
 ;
 
 def:
@@ -64,6 +71,8 @@ def:
 | VAR IDENT stype                           { ASTVar ($2, $3) }
 | PROC IDENT LBRA argsp RBRA block           { ASTProc ($2, $4, $6) }
 | PROC REC IDENT LBRA argsp RBRA block       { ASTProcRec ($3, $5, $7) }
+| FUN IDENT type1 LBRA args RBRA block       { ASTFunP ($2, $3, $5, $7) }
+| FUN REC IDENT type1 LBRA args RBRA block   { ASTFunRecP ($3, $4, $6, $8) }
 ;
 
 stype:

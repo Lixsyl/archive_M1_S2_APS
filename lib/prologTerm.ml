@@ -68,6 +68,11 @@ let rec pp_lval fmt l =
     | ASTId s -> fprintf fmt "ident(%s)" s
     | ASTNth(l, e) -> fprintf fmt "nth(%a,%a)" pp_lval l pp_expr e
 
+(*RETURN*)
+let pp_ret fmt r =
+  match r with
+    | ASTRet e -> fprintf fmt "ret(%a)" pp_expr e
+
 (*STAT*)
 let rec pp_stat fmt s = 
   match s with
@@ -86,6 +91,8 @@ and pp_def fmt d =
     | ASTVar(s, t)-> fprintf fmt "var(%s,%a)" s pp_stype t
     | ASTProc(s, al, b) -> fprintf fmt "proc(%s,[%a],%a)" s pp_argsp al pp_block b
     | ASTProcRec(s, al, b) -> fprintf fmt "procrec(%s,[%a],%a)" s pp_argsp al pp_block b
+    | ASTFunP(s, t, al, b) -> fprintf fmt "funp(%s,%a,[%a],%a)" s pp_type t pp_args al pp_block b
+    | ASTFunRecP(s, t, al, b) -> fprintf fmt "funrecp(%s,%a,[%a],%a)" s pp_type t pp_args al pp_block b
 
 (*CMDS*)
 and pp_cmd fmt c =
@@ -93,6 +100,7 @@ and pp_cmd fmt c =
     | ASTStat s -> fprintf fmt "stat(%a)" pp_stat s
     | ASTDef(d, co) -> fprintf fmt "def(%a,%a)" pp_def d pp_cmd co
     | ASTStats(s, co) -> fprintf fmt "stats(%a,%a)" pp_stat s pp_cmd co
+    | ASTReturn r -> fprintf fmt "%a" pp_ret r
 
 (*BLOCK*)
 and pp_block fmt b = 

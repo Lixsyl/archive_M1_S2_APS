@@ -34,16 +34,17 @@ rule token = parse
   | "VAR"            { VAR  } (*APS1*)
   | "PROC"           { PROC } (*APS1*)
   | "SET"            { SET  } (*APS1*)
-  | "IF"             { IF2   } (*APS1*)
+  | "IF"             { IF2  } (*APS1*)
   | "WHILE"          { WHILE } (*APS1*)
   | "CALL"           { CALL } (*APS1*)
-  | "var"            { VAR2  } (*APS1a*)
-  | "adr"            { ADR } (*APS1a*)
+  | "var"            { VAR2 } (*APS1a*)
+  | "adr"            { ADR  } (*APS1a*)
   | "alloc"          { ALLOC } (*APS2*)
-  | "len"            { LEN } (*APS2*)
-  | "nth"            { NTH } (*APS2*)
+  | "len"            { LEN  } (*APS2*)
+  | "nth"            { NTH  } (*APS2*)
   | "vset"           { VSET } (*APS2*)
-  | "vec"            { VEC } (*APS2*)
+  | "vec"            { VEC  } (*APS2*)
+  | "RETURN"         { RETURN } (*APS3*)
   | ['0'-'9']+('.'['0'-'9'])? as lxm { NUM(int_of_string lxm) }
   | ['a'-'z']['a'-'z''A'-'Z''0'-'9']* as lxm { IDENT(lxm) }
   | eof              { raise Eof }
