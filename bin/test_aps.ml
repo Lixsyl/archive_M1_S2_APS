@@ -22,6 +22,13 @@ let l_test_1a = [("examples/APS1a/prog11.aps", "KO");
 
 let l_test_2 = [(testfile_name 2 15, "OK")]
 
+let l_test_3 = [(testfile_name 3 16, "OK");
+                (testfile_name 3 17, "OK");
+                (testfile_name 3 18, "OK");
+                (testfile_name 3 19, "OK");
+                (testfile_name 3 20, "OK");
+                (testfile_name 3 21, "OK")]
+
 
 let test_prologTerm (l_test : string list) =
 List.fold_right
@@ -65,4 +72,9 @@ let _ =
   test_prologTerm (fst (List.split l_test_2 ));
   print_endline "- Test du typeur\n";
   test_typeur l_test_2;
+  Format.printf "========== Tests de APS 3 ==========\n";
+  Format.printf "- Test de PrologTerm\n";
+  test_prologTerm (fst (List.split l_test_3 ));
+  print_endline "- Test du typeur\n";
+  test_typeur l_test_3;
 

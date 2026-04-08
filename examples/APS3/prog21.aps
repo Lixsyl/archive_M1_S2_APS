@@ -1,0 +1,12 @@
+[
+    VAR x int ;
+    FUN f int [i : int] [ VAR x int ;
+                        SET x 0;
+                        WHILE (lt x i)
+                            [ IF (eq x 5)
+                                [ RETURN 1 ]
+                                [ SET x (add x 1) ] ];
+                        RETURN 0 ] ; 
+    ECHO (f 3)
+]
+

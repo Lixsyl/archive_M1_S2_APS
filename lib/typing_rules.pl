@@ -20,7 +20,7 @@ arrow(_,_).
 /* Programmes */
 type_prog(prog(B)) :- 
     contexte_initial(G),
-    type_block(G,B,void).
+    type_block(G,B,_T).
 
 /* Blocks */
 type_block(G,block(CS),T) :- 
@@ -101,6 +101,9 @@ type_stat(G,if2(E,B1,B2),sumT(T,void)) :-
     type_expr(G,E,bool),
     type_block(G,B1,T),
     type_block(G,B2,void).
+type_stat(G,while(E,B),sumT(T,void)) :- 
+    type_expr(G,E,bool),
+    type_block(G,B,sumT(T,void)).
 type_stat(G,while(E,B),sumT(T,void)) :- 
     type_expr(G,E,bool),
     type_block(G,B,T).

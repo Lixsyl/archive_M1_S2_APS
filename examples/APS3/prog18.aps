@@ -1,0 +1,4 @@
+[
+    FUN f int [i : int] [ RETURN i ] ; 
+    ECHO (f 3)
+]

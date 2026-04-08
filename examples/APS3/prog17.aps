@@ -1,0 +1,3 @@
+[
+    IF true [ ECHO 0 ] [ RETURN 1 ] 
+]

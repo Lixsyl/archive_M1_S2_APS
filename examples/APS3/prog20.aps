@@ -1,0 +1,5 @@
+[
+    VAR x int ;
+    FUN f int [i : int] [ ECHO 1; RETURN 1 ] ; 
+    ECHO (f 3)
+]
